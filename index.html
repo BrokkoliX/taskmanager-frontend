@@ -205,7 +205,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Edit Task</h3>
-                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+                <button class="close-btn" onclick="window.taskActions.closeEdit()">&times;</button>
             </div>
             <form id="editForm">
                 <input type="hidden" id="editTaskId">
@@ -266,7 +266,7 @@
                 </div>
                 <div class="modal-actions">
                     <button type="submit" class="btn btn-primary">💾 Save Changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.taskActions.closeEdit()">Cancel</button>
                 </div>
             </form>
         </div>
@@ -277,7 +277,7 @@
         <div class="modal-content modal-large">
             <div class="modal-header">
                 <h3 id="taskDetailsTitle">Task Details</h3>
-                <button class="close-btn" onclick="closeTaskDetailsModal()">&times;</button>
+                <button class="close-btn" onclick="window.taskActions.closeDetails()">&times;</button>
             </div>
             <div class="task-details-body">
                 <div id="taskDetailsInfo" class="task-info-section">
@@ -323,7 +323,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Edit User</h3>
-                <button class="close-btn" onclick="closeEditUserModal()">&times;</button>
+                <button class="close-btn" onclick="window.userActions.closeEdit()">&times;</button>
             </div>
             <form id="editUserForm">
                 <input type="hidden" id="editUserId">
@@ -361,12 +361,12 @@
                 </div>
                 <div class="modal-actions">
                     <button type="submit" class="btn btn-primary">💾 Save Changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeEditUserModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.userActions.closeEdit()">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script src="app.js?v=20260118-4"></script>
+    <script type="module" src="src/app.js"></script>
 </body>
 </html>
