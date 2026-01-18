@@ -1,6 +1,6 @@
 // API Base URL
-const API_BASE = '/tasks';
-const USERS_API_BASE = '/users';
+const API_BASE = 'http://localhost:5000/api/tasks';
+const USERS_API_BASE = 'http://localhost:5000/api/users';
 
 // Global state
 let users = [];
@@ -475,6 +475,9 @@ function displayTasks(tasks) {
             <div class="task-footer">
                 <span class="task-id">ID: ${task.id}</span>
                 <div class="task-actions">
+                    <button class="btn btn-info" onclick='openTaskDetailsModal(${JSON.stringify(task).replace(/'/g, "&apos;")})'>
+                        💬 View Details
+                    </button>
                     <button class="btn btn-secondary" onclick='toggleComplete(${JSON.stringify(task).replace(/'/g, "&apos;")})'>
                         ${task.isCompleted ? '↶ Mark Incomplete' : '✓ Mark Complete'}
                     </button>
@@ -818,4 +821,217 @@ function showUserLoading() {
 // Show user error
 function showUserError(message) {
     usersList.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+}
+
+// ============================================
+// COMMENTS FUNCTIONALITY
+// ============================================
+
+const COMMENTS_API_BASE = 'http://localhost:5000/api/comments';
+
+// Comment modal elements
+const taskDetailsModal = document.getElementById('taskDetailsModal');
+const taskDetailsTitle = document.getElementById('taskDetailsTitle');
+const taskDetailsInfo = document.getElementById('taskDetailsInfo');
+const commentsList = document.getElementById('commentsList');
+const commentCount = document.getElementById('commentCount');
+const addCommentForm = document.getElementById('addCommentForm');
+const commentTaskId = document.getElementById('commentTaskId');
+const commentContent = document.getElementById('commentContent');
+const commentUser = document.getElementById('commentUser');
+
+// Add event listener for comment form
+document.addEventListener('DOMContentLoaded', () => {
+    if (addCommentForm) {
+        addCommentForm.addEventListener('submit', handleAddComment);
+    }
+    
+    if (taskDetailsModal) {
+        taskDetailsModal.addEventListener('click', (e) => {
+            if (e.target === taskDetailsModal) {
+                closeTaskDetailsModal();
+            }
+        });
+    }
+});
+
+// Open task details modal with comments
+async function openTaskDetailsModal(task) {
+    commentTaskId.value = task.id;
+    taskDetailsTitle.textContent = `Task: ${task.title}`;
+    
+    // Display task info
+    const priorityLabels = ['Low', 'Medium', 'High'];
+    const priorityClasses = ['priority-low', 'priority-medium', 'priority-high'];
+    const priorityLabel = priorityLabels[task.priority] || 'Medium';
+    const priorityClass = priorityClasses[task.priority] || 'priority-medium';
+    
+    taskDetailsInfo.innerHTML = `
+        <div class="task-detail-card">
+            <div class="task-header">
+                <h3>${escapeHtml(task.title)}</h3>
+                <span class="task-status ${task.isCompleted ? 'completed' : 'pending'}">
+                    ${task.isCompleted ? '✓ Completed' : '○ Pending'}
+                </span>
+            </div>
+            ${task.description ? `<p class="task-description">${escapeHtml(task.description)}</p>` : ''}
+            <div class="task-metadata">
+                ${task.assignee?.name ? `<span class="task-meta-item">👤 ${escapeHtml(task.assignee.name)}</span>` : ''}
+                <span class="task-meta-item ${priorityClass}">⚡ ${priorityLabel}</span>
+                ${task.category ? `<span class="task-meta-item">🏷️ ${escapeHtml(task.category)}</span>` : ''}
+                ${task.dueDate ? `<span class="task-meta-item">📅 ${new Date(task.dueDate).toLocaleDateString()}</span>` : ''}
+            </div>
+        </div>
+    `;
+    
+    // Populate comment user dropdown
+    populateCommentUserDropdown();
+    
+    // Load comments for this task
+    await loadComments(task.id);
+    
+    // Show modal
+    taskDetailsModal.classList.add('show');
+}
+
+// Close task details modal
+function closeTaskDetailsModal() {
+    taskDetailsModal.classList.remove('show');
+    addCommentForm.reset();
+}
+
+// Populate comment user dropdown
+function populateCommentUserDropdown() {
+    // Clear existing options except the first one (-- Anonymous --)
+    while (commentUser.options.length > 1) {
+        commentUser.remove(1);
+    }
+    
+    // Add user options
+    users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.id;
+        option.textContent = user.name;
+        commentUser.appendChild(option);
+    });
+}
+
+// Load comments for a task
+async function loadComments(taskId) {
+    try {
+        commentsList.innerHTML = '<div class="loading">Loading comments...</div>';
+        
+        const response = await fetch(`${COMMENTS_API_BASE}/task/${taskId}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const comments = await response.json();
+        displayComments(comments);
+    } catch (error) {
+        commentsList.innerHTML = '<div class="error">Failed to load comments.</div>';
+        console.error('Error loading comments:', error);
+    }
+}
+
+// Display comments
+function displayComments(comments) {
+    commentCount.textContent = comments.length;
+    
+    if (comments.length === 0) {
+        commentsList.innerHTML = '<div class="empty-state">No comments yet. Be the first to comment!</div>';
+        return;
+    }
+    
+    commentsList.innerHTML = comments.map(comment => {
+        const commentDate = new Date(comment.createdAt);
+        const formattedDate = commentDate.toLocaleDateString() + ' ' + commentDate.toLocaleTimeString();
+        const userName = comment.createdByUserName || 'Anonymous';
+        const isEdited = comment.updatedAt && comment.updatedAt !== comment.createdAt;
+        
+        return `
+            <div class="comment-item">
+                <div class="comment-header">
+                    <span class="comment-author">👤 ${escapeHtml(userName)}</span>
+                    <span class="comment-date">${formattedDate}${isEdited ? ' (edited)' : ''}</span>
+                </div>
+                <div class="comment-content">${escapeHtml(comment.content)}</div>
+                <div class="comment-actions">
+                    <button class="btn-link btn-danger-link" onclick="deleteComment(${comment.id})">
+                        🗑️ Delete
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Handle add comment
+async function handleAddComment(e) {
+    e.preventDefault();
+    
+    const content = commentContent.value.trim();
+    const taskId = parseInt(commentTaskId.value);
+    const userId = commentUser.value ? parseInt(commentUser.value) : null;
+    
+    if (!content) {
+        alert('Please enter a comment');
+        return;
+    }
+    
+    const newComment = {
+        content: content,
+        taskItemId: taskId,
+        createdByUserId: userId
+    };
+    
+    try {
+        const response = await fetch(COMMENTS_API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newComment)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Clear form
+        commentContent.value = '';
+        
+        // Reload comments
+        await loadComments(taskId);
+        
+        showSuccessMessage('💬 Comment added successfully!');
+    } catch (error) {
+        alert('Failed to add comment. Please try again.');
+        console.error('Error adding comment:', error);
+    }
+}
+
+// Delete comment
+async function deleteComment(commentId) {
+    if (!confirm('Are you sure you want to delete this comment?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${COMMENTS_API_BASE}/${commentId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Reload comments
+        const taskId = parseInt(commentTaskId.value);
+        await loadComments(taskId);
+        
+        showSuccessMessage('💬 Comment deleted successfully!');
+    } catch (error) {
+        alert('Failed to delete comment. Please try again.');
+        console.error('Error deleting comment:', error);
+    }
 }

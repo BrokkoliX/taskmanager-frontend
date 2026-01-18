@@ -272,6 +272,52 @@
         </div>
     </div>
 
+    <!-- Task Details Modal with Comments -->
+    <div id="taskDetailsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="taskDetailsTitle">Task Details</h3>
+                <button class="close-btn" onclick="closeTaskDetailsModal()">&times;</button>
+            </div>
+            <div class="task-details-body">
+                <div id="taskDetailsInfo" class="task-info-section">
+                    <!-- Task info will be populated here -->
+                </div>
+                
+                <div class="comments-section">
+                    <h3>💬 Comments (<span id="commentCount">0</span>)</h3>
+                    
+                    <form id="addCommentForm" class="add-comment-form">
+                        <input type="hidden" id="commentTaskId">
+                        <div class="form-group">
+                            <textarea 
+                                id="commentContent" 
+                                placeholder="Add a comment..." 
+                                rows="3"
+                                required
+                                maxlength="1000"
+                            ></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <select id="commentUser">
+                                    <option value="">-- Anonymous --</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                💬 Add Comment
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div id="commentsList" class="comments-list">
+                        <div class="loading">Loading comments...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Edit User Modal -->
     <div id="editUserModal" class="modal">
         <div class="modal-content">
@@ -321,6 +367,6 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=20260118-4"></script>
 </body>
 </html>
