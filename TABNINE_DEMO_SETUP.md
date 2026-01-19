@@ -8,9 +8,12 @@
 
 - [ ] Backend repo exists: https://github.com/BrokkoliX/taskmanager-backend
 - [ ] Frontend repo exists: https://github.com/BrokkoliX/taskmanager-frontend
+- [ ] MCP Servers repo exists: https://github.com/BrokkoliX/MCP-servers
 - [ ] VS Code is installed
 - [ ] .NET 9 SDK is installed
+- [ ] Node.js is installed (for MCP servers)
 - [ ] Python 3 is installed (for frontend server)
+- [ ] MCP server dependencies installed: `cd taskmanager-mcp-servers && npm run install:all`
 
 ---
 
@@ -55,12 +58,38 @@ code /Users/robbie/Tab/TabnineTaskDemo/taskmanager-frontend
 
 ---
 
-### **Step 3: Start Backend API**
+### **Step 3: Start MCP Servers**
+
+MCP servers provide additional functionality (database access, security scanning).
 
 Open a **NEW TERMINAL WINDOW** (NOT in VS Code):
 
 ```bash
-cd /Users/robbie/Tab/TabnineTaskDemo/TaskManager.Api
+cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-mcp-servers
+./start-demo.sh
+```
+
+**Expected Output:**
+```
+🚀 Starting TaskManager MCP Servers for Demo...
+✅ SQLite MCP Server started (PID: xxxxx)
+✅ Snyk MCP Server started (PID: xxxxx)
+```
+
+**Note:** MCP servers run in background. Check status anytime:
+```bash
+cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-mcp-servers
+./status-demo.sh
+```
+
+---
+
+### **Step 4: Start Backend API**
+
+Open a **NEW TERMINAL WINDOW** (NOT in VS Code):
+
+```bash
+cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-backend
 dotnet run
 ```
 
@@ -72,9 +101,15 @@ Application started. Press Ctrl+C to shut down.
 
 **⚠️ Keep this terminal running during the demo!**
 
+**Alternative:** Use the full demo startup script:
+```bash
+cd /Users/robbie/Tab/TabnineTaskDemo
+./start-full-demo.sh  # Starts MCP servers + Backend
+```
+
 ---
 
-### **Step 4: Start Frontend Server (Optional)**
+### **Step 5: Start Frontend Server (Optional)**
 
 If you want to test the UI:
 
@@ -94,7 +129,7 @@ Serving HTTP on 0.0.0.0 port 8080 (http://0.0.0.0:8080/) ...
 
 ---
 
-### **Step 5: Verify Everything Works**
+### **Step 6: Verify Everything Works**
 
 #### **Test Backend API:**
 ```bash
@@ -327,10 +362,12 @@ If CORS is missing, add it to backend code.
 ### **Repositories**
 - **Frontend:** https://github.com/BrokkoliX/taskmanager-frontend
 - **Backend:** https://github.com/BrokkoliX/taskmanager-backend
+- **MCP Servers:** https://github.com/BrokkoliX/MCP-servers
 
 ### **Local Paths**
 - **Frontend:** `/Users/robbie/Tab/TabnineTaskDemo/taskmanager-frontend`
-- **Backend:** `/Users/robbie/Tab/TabnineTaskDemo/TaskManager.Api`
+- **Backend:** `/Users/robbie/Tab/TabnineTaskDemo/taskmanager-backend`
+- **MCP Servers:** `/Users/robbie/Tab/TabnineTaskDemo/taskmanager-mcp-servers`
 
 ### **URLs When Running**
 - **Backend API:** http://localhost:5000
@@ -342,11 +379,20 @@ If CORS is missing, add it to backend code.
 ## 📝 Quick Command Reference
 
 ```bash
+# Full demo startup (MCP + Backend)
+cd /Users/robbie/Tab/TabnineTaskDemo && ./start-full-demo.sh
+
+# Start MCP servers only
+cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-mcp-servers && ./start-demo.sh
+
+# Check MCP server status
+cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-mcp-servers && ./status-demo.sh
+
 # Open frontend workspace
 code /Users/robbie/Tab/TabnineTaskDemo/taskmanager-frontend
 
 # Start backend (separate terminal)
-cd /Users/robbie/Tab/TabnineTaskDemo/TaskManager.Api && dotnet run
+cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-backend && dotnet run
 
 # Start frontend server (separate terminal)
 cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-frontend && python3 -m http.server 8080
@@ -356,6 +402,9 @@ curl http://localhost:5000/api/tasks
 
 # Test frontend
 open http://localhost:8080
+
+# Stop everything
+cd /Users/robbie/Tab/TabnineTaskDemo && ./stop-full-demo.sh
 
 # Check Tabnine status
 # Look at bottom-right status bar in VS Code
@@ -370,6 +419,7 @@ Before starting your demo, run through this checklist:
 - [ ] VS Code open with **frontend workspace only**
 - [ ] Tabnine showing in status bar (bottom-right)
 - [ ] Backend repo added to Tabnine remote repositories
+- [ ] MCP servers running: `cd taskmanager-mcp-servers && ./status-demo.sh`
 - [ ] Backend running in terminal (http://localhost:5000)
 - [ ] Backend responding: `curl http://localhost:5000/api/tasks`
 - [ ] Frontend server running (optional): http://localhost:8080
@@ -382,19 +432,81 @@ Before starting your demo, run through this checklist:
 
 ## 🎊 Demo Complete - Cleanup
 
-After demo, stop the services:
+After demo, stop all services:
 
+### **Option 1: Quick Stop (Automated)**
 ```bash
+cd /Users/robbie/Tab/TabnineTaskDemo
+./stop-full-demo.sh  # Stops MCP servers + Backend
+```
+
+Then stop frontend:
+```bash
+# In frontend terminal: Ctrl+C
+```
+
+### **Option 2: Manual Stop**
+```bash
+# Stop MCP servers
+cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-mcp-servers
+./stop-demo.sh
+
 # In backend terminal: Ctrl+C
 # In frontend terminal: Ctrl+C
 ```
 
 **Optional:** Clear any test data created during demo:
 ```bash
-cd /Users/robbie/Tab/TabnineTaskDemo/TaskManager.Api
+cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-backend
 rm taskmanager.db
 dotnet ef database update  # Recreate empty database
 ```
+
+---
+
+## 🔄 Reset for Next Demo
+
+**Want to demo again? Reset everything to pristine state!**
+
+### **Option 1: Automated Reset (Recommended)**
+
+Interactive script with options:
+```bash
+cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-frontend
+./demo-reset.sh
+```
+
+This will:
+- Reset frontend code (discard any changes)
+- Reset backend code (discard any changes)
+- Offer database reset options (keep/delete/reseed)
+- Create automatic backups
+- Show next steps
+
+### **Option 2: Quick Reset (No Prompts)**
+
+Fast reset for quick turnarounds:
+```bash
+cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-frontend
+./quick-reset.sh
+```
+
+This instantly:
+- Resets all code to original state
+- Deletes database (with backup)
+- No questions asked!
+
+### **Full Documentation**
+
+See **DEMO_RESET_GUIDE.md** for:
+- Manual reset procedures
+- Troubleshooting reset issues
+- Creating baseline snapshots
+- Git branch strategies
+- Browser storage cleanup
+- Advanced reset workflows
+
+**Pro Tip:** Clear browser storage between demos or use incognito mode!
 
 ---
 
