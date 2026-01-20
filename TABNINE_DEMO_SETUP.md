@@ -90,7 +90,7 @@ Open a **NEW TERMINAL WINDOW** (NOT in VS Code):
 
 ```bash
 cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-backend
-dotnet run
+ASPNETCORE_ENVIRONMENT=Development dotnet run
 ```
 
 **Expected Output:**
@@ -99,6 +99,8 @@ Now listening on: http://localhost:5000
 Application started. Press Ctrl+C to shut down.
 ```
 
+**✅ Swagger will be available at:** http://localhost:5000/swagger
+
 **⚠️ Keep this terminal running during the demo!**
 
 **Alternative:** Use the full demo startup script:
@@ -106,6 +108,8 @@ Application started. Press Ctrl+C to shut down.
 cd /Users/robbie/Tab/TabnineTaskDemo
 ./start-full-demo.sh  # Starts MCP servers + Backend
 ```
+
+**Note:** If Swagger doesn't appear, make sure `ASPNETCORE_ENVIRONMENT=Development` is set.
 
 ---
 
@@ -392,7 +396,7 @@ cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-mcp-servers && ./status-demo.sh
 code /Users/robbie/Tab/TabnineTaskDemo/taskmanager-frontend
 
 # Start backend (separate terminal)
-cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-backend && dotnet run
+cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-backend && ASPNETCORE_ENVIRONMENT=Development dotnet run
 
 # Start frontend server (separate terminal)
 cd /Users/robbie/Tab/TabnineTaskDemo/taskmanager-frontend && python3 -m http.server 8080
