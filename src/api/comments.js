@@ -1,4 +1,4 @@
-const COMMENTS_API_BASE = 'http://localhost:5000/api/comments';
+const COMMENTS_API_BASE = 'http://localhost:5050/api/comments';
 
 /**
  * Fetch comments for a specific task

@@ -1,4 +1,4 @@
-const USERS_API_BASE = 'http://localhost:5000/api/users';
+const USERS_API_BASE = 'http://localhost:5050/api/users';
 
 /**
  * Fetch all users
